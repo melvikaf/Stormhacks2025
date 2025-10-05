@@ -52,7 +52,7 @@ h2 {
 
 h3 {
   font-family: 'caviar-dreams-bolditalic';
-  font-size: clamp(1rem, 12vw, 2rem);
+  font-size: clamp(1rem, 30vw, 2rem);
   max-width: 80rem;
   margin-left: 10rem;
   line-height: 3rem;
@@ -118,15 +118,19 @@ h3 {
 
 .button-nav a {
   font-family: 'babapro';
-  font-size: clamp(1rem, 6vw, 5rem);
+  font-size: clamp(1rem, 6vw, 4rem);
   color: #1F41DA;
   transition: color 0.3s ease, font-size 0.3s ease;
 }
 
 .button-nav a:hover {
   font-family: 'babapro';
-  font-size: clamp(2rem, 7vw, 6rem); 
+  font-size: clamp(2rem, 7vw, 5rem); 
   color: #21358e;
+}
+
+#main-btn {
+  color: #a70fda;
 }
 
 /* Search bar */
@@ -414,7 +418,7 @@ h3 {
     grid-template-columns: 1fr; 
     gap: 1rem;
   }
-  
+
   .playlist-item {
     width: 100%; 
     padding: 1rem;
