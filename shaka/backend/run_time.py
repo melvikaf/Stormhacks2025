@@ -89,8 +89,8 @@ async def ws_server():
 async def camera_loop():
     global output_frame
     cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
 
     print("🎥 Camera stream active — resilient dual-hand overlay")
 

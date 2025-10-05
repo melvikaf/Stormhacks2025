@@ -66,7 +66,7 @@ h3 {
 .navbar {
   color: white;
   background: linear-gradient(90deg, #a70fda, #1F41DA);
-  padding: 0.3rem 1rem;
+  padding: 0.1rem 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -94,7 +94,7 @@ h3 {
 }
 
 .nav-links li a {
-  padding: 1.5rem;
+  padding: 1.3rem;
   color: white;
   text-decoration: none;
   font-weight: bold;
@@ -233,11 +233,15 @@ h3 {
 }
 
 /* DJ part */
+#dj-title {
+  margin: 0;
+}
+
 .curr-next-songs {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 90%;
+  width: 75%;
   margin-bottom: 0.5rem;
 }
 

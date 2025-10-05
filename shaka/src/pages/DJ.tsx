@@ -128,42 +128,30 @@ export default function DJ() {
 
   return (
     <div className="content flex flex-col items-center p-6 space-y-6">
-      <h2 className="text-2xl font-bold mb-2">Now Playing: {playlist.name}</h2>
-
-      {/* ✅ Embedded gesture video feed from Python */}
-      <div className="relative w-[640px] h-[480px] border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
-        <img
-          ref={imgRef}
-          src="http://localhost:5000/video_feed"
-          alt="Gesture feed"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-3 py-1 rounded text-sm">
-          Last Gesture: <strong>{lastGesture}</strong>
-        </div>
-      </div>
-
+      <h2 className="text-2xl font-bold mb-2" id="dj-title">Now Playing: {playlist.name}</h2>
+      
       {/* ✅ Current / Next Songs + Play Control */}
-      <div className="flex items-center space-x-6 mt-4">
-        <div>
-          <span>Current: </span>
-          <strong>{currentSong.title}</strong>
-        </div>
+      <div className="curr-next-songs">
+  <div className="current-song">
+    <span>Current:</span>
+    <span>{currentSong.title}</span>
+  </div>
 
-        <button
-          onClick={togglePlay}
-          className="px-4 py-2 border border-gray-400 rounded-md hover:bg-gray-100"
-        >
-          {isPlaying ? "⏸ Pause" : "▶ Play"}
-        </button>
+  <div className="play-btn">
+    <button onClick={togglePlay}>
+      {isPlaying ? "⏸" : "▶"}
+    </button>
+  </div>
 
-        {nextSong && (
-          <div>
-            <span>Next: </span>
-            <strong>{nextSong}</strong>
-          </div>
-        )}
-      </div>
+  {nextSong && (
+    <div className="next-song">
+      <span>Next:</span>
+      <span>{nextSong}</span>
+    </div>
+  )}
+</div>
+
+
 
       {/* ✅ Progress Bar */}
       <div className="w-[640px] h-2 bg-gray-300 rounded">
@@ -177,6 +165,18 @@ export default function DJ() {
       <audio ref={audioRef}>
         <source src={currentSong.url} type="audio/mp3" />
       </audio>
-    </div>
+
+      {/* ✅ Embedded gesture video feed from Python */}
+      <div className="relative w-full max-w-3xl aspect-video border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
+  <img
+    ref={imgRef}
+    src="http://localhost:5000/video_feed"
+    alt="Gesture feed"
+    className="w-full h-full object-cover"
+  />
+</div>
+
+
+          </div>
   )
 }
