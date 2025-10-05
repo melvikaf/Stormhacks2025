@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
+import { PerlinNoiseBackground } from './assets/PerlinNoise';
 
 import BackButton from './assets/BackButton';
 import Home from './pages/Home';
@@ -11,6 +12,7 @@ function App() {
   return (
     <Router>
       <div>
+        <PerlinNoiseBackground />
         <nav className="navbar">
           <BackButton />
           <div className="nav-container">

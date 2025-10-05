@@ -8,26 +8,52 @@
   src: url('./assets/fonts/caviar_dreams/CaviarDreams.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'caviar-dreams-italic';
+  src: url('./assets/fonts/caviar_dreams/CaviarDreams_Italic.ttf') format('truetype');
+}
+
+
 body {
-  margin: 0;
   font-family: 'caviar-dreams', Arial, sans-serif;
   font-size: 1rem;
-  background-color: #222026;
-  width: 100%;
+  width: 100vw;
 }
 
 .content h1 {
   font-family: 'babapro', Arial, sans-serif;
   font-size: 35rem;
   color: #1F41DA;
-  margin: 10rem 0;
+  margin: 1rem 0;
   text-align: left;
+}
+
+#home-title {
+  align-items: flex-start;
+  padding-left: 5rem;
+}
+
+.content {
+  padding-top: 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  box-sizing: border-box;
 }
 
 h2 {
   font-family: 'babapro', Arial, sans-serif;
   font-size: 4rem;
   color: #1F41DA;
+}
+
+h3 {
+  font-family: 'caviar-dreams-italic';
+  font-size: 2rem;
+  max-width: 80rem;
+  margin-left: 10rem;
+  line-height: 3rem;
 }
 
 .logo {
@@ -79,20 +105,13 @@ h2 {
   background-color: #21358e;
 }
 
-.content {
-  padding-top: 6rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100vw;
-  box-sizing: border-box;
-}
-
 .button-nav {
+  margin-top: 10rem;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: 98vw;
+  width: 94vw;
 }
 
 .button-nav a {
@@ -124,7 +143,7 @@ h2 {
   font-size: 1.5rem;
   border-radius: 8px;
   border: 3px solid #1F41DA;
-  background-color: #2D2A32;
+  background-color: #2a272b;
   color: white;
   outline: none;
   transition: all 0.3s ease;
@@ -136,15 +155,15 @@ h2 {
 }
 
 .search-bar:hover {
-  border-color: #21358e;
+  border-color: #7f289c;
 }
 
 .search-bar:focus {
   border-color: #C44DEB;
-  box-shadow: 0 0 20px rgba(31, 65, 218, 0.5);
+  box-shadow: 0 0 20px rgba(17, 18, 20, 0.5);
 }
 
-/* Playlist.css */
+/* Playlist */
 .playlist-content ul {
   list-style: none;
   padding: 0;

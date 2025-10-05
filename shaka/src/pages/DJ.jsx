@@ -6,7 +6,6 @@ function DJ() {
 
   return (
     <div className="content">
-      <h1>DJ Page</h1>
       {playlist ? (
         <>
           <p>Now playing: <strong>{playlist.name}</strong></p>
