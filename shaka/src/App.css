@@ -13,13 +13,21 @@ body {
   font-family: 'caviar-dreams', Arial, sans-serif;
   font-size: 1rem;
   background-color: #222026;
+  width: 100%;
 }
 
-h1 {
+.content h1 {
   font-family: 'babapro', Arial, sans-serif;
-  font-size: 40rem;
+  font-size: 35rem;
   color: #1F41DA;
-  margin: 10rem 3rem 8rem 0;
+  margin: 10rem 0;
+  text-align: left;
+}
+
+h2 {
+  font-family: 'babapro', Arial, sans-serif;
+  font-size: 4rem;
+  color: #1F41DA;
 }
 
 .logo {
@@ -34,11 +42,8 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  position: relative;
-  left: 50%;
-  right: 50%;
+  width: 100%;
+  /* Full width of parent */
   box-sizing: border-box;
   position: fixed;
   top: 0;
@@ -50,12 +55,13 @@ h1 {
   display: flex;
   justify-content: flex-end;
   flex: 1;
+  padding: 1rem;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin: 0;
   padding: 0;
 }
@@ -74,7 +80,12 @@ h1 {
 }
 
 .content {
-  padding: 2rem;
+  padding-top: 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  box-sizing: border-box;
 }
 
 .button-nav {
@@ -95,4 +106,35 @@ h1 {
   font-family: 'babapro';
   font-size: 5rem;
   color: #7f289c;
+}
+
+/* SEARCH BAR CONTAINER */
+.search-container {
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+}
+
+.search-bar {
+  font-family: 'caviar-dreams', Arial, sans-serif;
+  align-items: flex-start;
+  width: 70vw;
+  padding: 1rem 1.5rem;
+  font-size: 1.5rem;
+  border-radius: 8px;
+  border: 3px solid #1F41DA;
+  background-color: #2D2A32;
+  color: white;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-bar::placeholder {
+  color: #C44DEB;
+  opacity: 0.7;
+}
+
+.search-bar:focus {
+  border-color: #C44DEB;
+  box-shadow: 0 0 20px rgba(31, 65, 218, 0.5);
 }
