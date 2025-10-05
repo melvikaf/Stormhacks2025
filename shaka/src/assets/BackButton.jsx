@@ -7,7 +7,7 @@ export default function BackButton() {
   return (
     <div className="back-button-container">
       <button className="back-button" onClick={handleBack}>
-        &larr; Back
+        ↼
       </button>
     </div>
   );

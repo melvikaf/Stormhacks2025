@@ -70,7 +70,11 @@ export default function DJ() {
           <span>Current:</span>
           <span>{currentSong.title}</span>
         </div>
-
+        <div className="play-btn">
+          <button onClick={togglePlay}>
+            {isPlaying ? "⏸" : "▶"}
+          </button>
+        </div>
         {nextSong && (
           <div className="next-song">
             <span>Next:</span>
@@ -86,11 +90,7 @@ export default function DJ() {
         />
       </div>
 
-      <div className="play-btn">
-        <button onClick={togglePlay}>
-          {isPlaying ? "⏸ Pause" : "▶️ Play"}
-        </button>
-      </div>
+
     </div>
   )
 }
