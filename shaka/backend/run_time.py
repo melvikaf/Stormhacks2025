@@ -1,190 +1,190 @@
-# using fake dataset first since gesture detection file is not complete
+# run_time.py
+# ------------------------------------------------------------
+# Runs Flask video stream + WebSocket + gesture detection
+# ------------------------------------------------------------
+# Run with: python run_time.py
+# Requires:
+#   pip install flask flask-cors websockets opencv-python
+# ------------------------------------------------------------
 
-# dependecies installed:
-# pip install websockets
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # silence TensorFlow spam
 
-
-import websockets
 import asyncio
-import json 
-import random
+import json
 import time
-
-# importing from gestures.py
 import cv2
-from gestures import detect
+import threading
+import websockets
+from flask import Flask, Response
+from flask_cors import CORS
+from gestures import detect, state   # your existing detect() + state dict
 
-
-# ------------------------------
-# Global state
-# ------------------------------
-STATE = {
-    "xfader": 0.5,
-    "reverb": False,
-    "lowpass": False,
-}
-
-# Cooldowns (seconds) for one-shot actions
-COOLDOWNS = {
-    "next_track": 0.8,
-    "stop_all": 0.8,
-    "resume": 0.8,
-    "lowpass_drop": 1.0,
-}
-_last_fired = {}
-
-# Connected WebSocket clients
+# ------------------------------------------------------------
+# Globals
+# ------------------------------------------------------------
 CLIENTS = set()
+frame_lock = threading.Lock()
+output_frame = None
 
+# ------------------------------------------------------------
+# Flask setup (video stream)
+# ------------------------------------------------------------
+app = Flask(__name__)
+CORS(app)
 
-# ------------------------------
-# Helpers
-# ------------------------------
-def can_fire(action: str) -> bool:
-    now = time.time()
-    last = _last_fired.get(action, 0)
-    cd = COOLDOWNS.get(action, 0)
-    if now - last >= cd:
-        _last_fired[action] = now
-        return True
-    return False
+@app.route("/video_feed")
+def video_feed():
+    """Continuously stream MJPEG frames to the web UI."""
+    def generate():
+        global output_frame
+        while True:
+            with frame_lock:
+                if output_frame is None:
+                    continue
+                ok, jpeg = cv2.imencode(".jpg", output_frame)
+                if not ok:
+                    continue
+                frame_bytes = jpeg.tobytes()
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
+            )
+    return Response(generate(),
+                    mimetype="multipart/x-mixed-replace; boundary=frame")
 
+def start_flask():
+    app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)
 
+# ------------------------------------------------------------
+# WebSocket setup
+# ------------------------------------------------------------
 async def broadcast(msg: dict):
-    """Send JSON to all connected WebSocket clients."""
+    """Send JSON to all connected clients."""
     if not CLIENTS:
         return
     data = json.dumps(msg)
-    await asyncio.gather(*[c.send(data) for c in list(CLIENTS)], return_exceptions=True)
+    await asyncio.gather(*[c.send(data) for c in list(CLIENTS)],
+                         return_exceptions=True)
 
-
-def step_xfader(delta: float):
-    STATE["xfader"] = max(0.0, min(1.0, STATE["xfader"] + delta))
-
-
-def map_gesture_to_actions(name: str):
-    """Turn a gesture name into one or more actions."""
-    if name == "WAVE_UP":
-        return [{"type": "action", "name": "next_track"}]
-    if name == "WAVE_DOWN":
-        return [{"type": "action", "name": "stop_all"}]
-    if name == "WAVE_LEFT":
-        return [{"type": "action", "name": "crossfader_step", "value": -0.1}]
-    if name == "WAVE_RIGHT":
-        return [{"type": "action", "name": "crossfader_step", "value": +0.1}]
-    if name == "FIST":
-        return [{"type": "action", "name": "lowpass_drop"}]
-    if name == "OPEN_PALM":
-        return [{"type": "action", "name": "reverb_hold"}]
-    if name == "SHAKA":
-        return [{"type": "action", "name": "resume"}]
-    return []
-
-
-# ------------------------------
-# Fake gesture generator
-# ------------------------------
-async def fake_source():
-    gestures = ["FIST","OPEN_PALM","SHAKA","WAVE_UP","WAVE_DOWN","WAVE_LEFT","WAVE_RIGHT"]
-    while True:
-        yield {"name": random.choice(gestures), "conf": 0.9, "ts": time.time()}
-        await asyncio.sleep(1.0)
-
-
-# ------------------------------
-# WebSocket handler
-# ------------------------------
-async def handle_incoming(ws):
-    """Listen for messages from frontend (e.g., invokes)."""
-    async for raw in ws:
-        try:
-            msg = json.loads(raw)
-        except:
-            continue
-        if msg.get("type") == "invoke":
-            if msg.get("name") == "toggle_reverb":
-                STATE["reverb"] = not STATE["reverb"]
-                await broadcast({"type":"action","name":"reverb_toggle","value":STATE["reverb"]})
-                await broadcast({"type":"state", **STATE})
-            elif msg.get("name") == "set_xfader":
-                STATE["xfader"] = float(msg.get("value", 0.5))
-                await broadcast({"type":"action","name":"xfader_set","value":STATE["xfader"]})
-                await broadcast({"type":"state", **STATE})
-
-
-async def ws_handler(ws, path):
-    CLIENTS.add(ws)
+async def ws_handler(ws):
     try:
-        await ws.send(json.dumps({"type":"state", **STATE}))
-        await handle_incoming(ws)
+        CLIENTS.add(ws)
+        await ws.send(json.dumps({"type": "connected"}))
+        async for _ in ws:
+            pass
+    except Exception as e:
+        print(f"⚠️ WebSocket connection error: {e}")
     finally:
         CLIENTS.discard(ws)
 
+async def ws_server():
+    async with websockets.serve(ws_handler, "localhost", 8765):
+        print("✅ WebSocket server running at ws://localhost:8765")
+        await asyncio.Future()
 
-# ------------------------------
-# Main loop
-# ------------------------------
-async def run_loop(source):
-    server = await websockets.serve(ws_handler, "localhost", 8765)
-    print("WebSocket server running at ws://localhost:8765")
-
-    async for g in source:
-        if not g:
-            continue
-        # Broadcast gesture
-        await broadcast({"type":"gesture","name":g["name"],"conf":g["conf"],"ts":g["ts"]})
-
-        # Map to actions
-        for act in map_gesture_to_actions(g["name"]):
-            name = act["name"]
-            if name == "crossfader_step":
-                step_xfader(act["value"])
-                await broadcast({"type":"action","name":name,"value":act["value"]})
-                await broadcast({"type":"state", **STATE})
-            elif name == "reverb_hold":
-                await broadcast({"type":"action","name":name})
-            else:
-                if can_fire(name):
-                    if name == "lowpass_drop":
-                        STATE["lowpass"] = True
-                        await broadcast({"type":"action","name":name})
-                        await broadcast({"type":"state", **STATE})
-                        asyncio.create_task(_release_lowpass())
-                    else:
-                        await broadcast({"type":"action","name":name})
-
-
-async def _release_lowpass():
-    await asyncio.sleep(1.0)
-    STATE["lowpass"] = False
-    await broadcast({"type":"action","name":"lowpass_release"})
-    await broadcast({"type":"state", **STATE})
-
-#camera source to connect to gestures.py
-async def camera_source():
+# ------------------------------------------------------------
+# Camera + Gesture Detection Loop
+# ------------------------------------------------------------
+async def camera_loop():
+    global output_frame
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+    print("🎥 Camera stream active — resilient dual-hand overlay")
+
     while True:
         ok, frame = cap.read()
-        if not ok:
-            break
+        if not ok or frame is None:
+            print("⚠️ Camera frame skipped")
+            await asyncio.sleep(0.05)
+            continue
 
-        results = detect(frame)   
+        frame = cv2.flip(frame, 1)
+
+        try:
+            results = detect(frame)
+        except Exception as e:
+            print(f"⚠️ Detect error: {e}")
+            results = []
+
+        # broadcast gesture events
         for r in results:
-            # Print detected gestures to console
-            print(f"Detected: {r['gesture']} (confidence: {r['conf']:.2f})")
-            # normalize output so it matches your expected format
-            yield {
-                "name": r["gesture"],
-                "conf": r["conf"],
-                "ts": r["ts"]
-            }
+            await broadcast({
+                "type": "gesture",
+                "hand": r.get("hand", "Unknown"),
+                "gesture": r.get("gesture", "None"),
+                "volume": r.get("volume", 0),
+                "fingers": r.get("fingers", 0),
+                "ts": r.get("ts", time.time())
+            })
 
-        # allow event loop to handle other tasks
-        await asyncio.sleep(0)
+        # Draw overlays for both hands
+        h, w, _ = frame.shape
+        left_x = 150
+        right_x = w // 2 + 200
+        y_base = 150
 
-# ------------------------------
-# Entrypoint for testing
-# ------------------------------
+        if results:
+            for r in results:
+                hand = r.get("hand", "Unknown")
+                x_pos = left_x if hand == "Left" else right_x
+                y = y_base
+
+                # translucent box
+                overlay = frame.copy()
+                cv2.rectangle(overlay, (x_pos - 20, y - 40),
+                              (x_pos + 450, y + 130), (0, 0, 0), -1)
+                frame = cv2.addWeighted(overlay, 0.4, frame, 0.6, 0)
+
+                # text + bars
+                gesture_text = r.get("gesture", "None")
+                fingers = r.get("fingers", 0)
+                vol = r.get("volume", 0)
+
+                cv2.putText(frame, f"{hand}: {gesture_text}",
+                            (x_pos, y),
+                            cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 0, 255), 2)
+                cv2.putText(frame, f"Fingers: {fingers}  |  Vol: {vol}",
+                            (x_pos, y + 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+
+                # volume bar
+                bar_x = x_pos
+                bar_y = h - 150
+                vol_height = int((vol / 100) * 300)
+                cv2.rectangle(frame, (bar_x, bar_y - vol_height),
+                              (bar_x + 60, bar_y), (0, 255, 0), -1)
+                cv2.rectangle(frame, (bar_x, bar_y - 300),
+                              (bar_x + 60, bar_y), (255, 255, 255), 3)
+
+                # wave info
+                wave_info = state.get(hand, {}).get("last_wave", {})
+                if time.time() - wave_info.get("time", 0) < 1.5:
+                    cv2.putText(frame, wave_info.get("text", ""),
+                                (x_pos, bar_y - 350),
+                                cv2.FONT_HERSHEY_DUPLEX, 1.1, (0, 255, 255), 3)
+        else:
+            # show fallback when no hands detected
+            cv2.putText(frame, "No hands detected",
+                        (int(w / 2) - 200, int(h / 2)),
+                        cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 255), 3)
+
+        # push frame to stream (always!)
+        with frame_lock:
+            output_frame = frame.copy()
+
+        await asyncio.sleep(0.05)
+
+    cap.release()
+
+# ------------------------------------------------------------
+# Entry Point
+# ------------------------------------------------------------
+async def main():
+    threading.Thread(target=start_flask, daemon=True).start()
+    await asyncio.gather(ws_server(), camera_loop())
+
 if __name__ == "__main__":
-    asyncio.run(run_loop(camera_source()))
-
+    asyncio.run(main())
