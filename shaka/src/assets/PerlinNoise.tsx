@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useRef } from "react"
 
 export function PerlinNoiseBackground() {
@@ -59,9 +57,9 @@ export function PerlinNoiseBackground() {
 
         let time = 0
         const scale = 0.002
-        const timeScale = 0.002 // Faster animation
-        const gridSize = 30
-        const maxRadius = 10
+        const timeScale = 0.006
+        const gridSize = 10
+        const maxRadius = 5
 
         const animate = () => {
             ctx.fillStyle = "#000"
@@ -71,21 +69,31 @@ export function PerlinNoiseBackground() {
                 for (let x = 0; x < canvas.width; x += gridSize) {
                     const noise1 = perlin(x * scale, y * scale + time)
                     const noise2 = perlin(x * scale * 2, y * scale * 2 + time * 1.5)
-                    const combinedNoise = (noise1 + noise2 * 0.5) / 1.5
+                    const combinedNoise = (noise1 + noise2 * 0.5) / 1.1
                     const normalizedNoise = (combinedNoise + 1) / 2
 
                     const offsetX = Math.sin(time * 2 + x * 0.01) * 5
                     const offsetY = Math.cos(time * 2 + y * 0.01) * 5
 
                     const pulse = Math.sin(time * 3 + x * 0.02 + y * 0.02) * 0.3 + 0.7
-                    const radius = normalizedNoise * maxRadius * pulse
+                    const dx = x - mouseX
+                    const dy = y - mouseY
+                    const distance = Math.sqrt(dx * dx + dy * dy)
+                    const maxDistance = 150
 
-                    const opacity = normalizedNoise * 0.6 + 0.2
-                    const blueValue = Math.floor(normalizedNoise * 100 + 155)
+                    let proximityBoost = 1
+                    if (distance < maxDistance) {
+                        proximityBoost = 1 + (1 - distance / maxDistance) * 1.5 // up to 2.5× bigger
+                    }
+                    const radius = normalizedNoise * maxRadius * pulse / proximityBoost
+
+                    const redValue = Math.floor(100 + 100 * Math.sin(x * 0.01 + time));
+                    const greenValue = Math.floor(100 + 100 * Math.sin(y * 0.01 + time + 1));
+                    const blueValue = Math.floor(100 + 100 * normalizedNoise);
 
                     ctx.beginPath()
                     ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2)
-                    ctx.fillStyle = `rgba(100, 120, ${blueValue}, ${opacity})`
+                    ctx.fillStyle = `rgb(${redValue}, ${greenValue}, ${blueValue})`
                     ctx.fill()
                 }
             }
@@ -94,10 +102,21 @@ export function PerlinNoiseBackground() {
             requestAnimationFrame(animate)
         }
 
+        let mouseX = -9999
+        let mouseY = -9999
+
+        const updateMousePosition = (e: MouseEvent) => {
+            mouseX = e.clientX
+            mouseY = e.clientY
+        }
+
+        window.addEventListener("mousemove", updateMousePosition)
+
         animate()
 
         return () => {
             window.removeEventListener("resize", setCanvasSize)
+            window.removeEventListener("mousemove", updateMousePosition)
         }
     }, [])
 

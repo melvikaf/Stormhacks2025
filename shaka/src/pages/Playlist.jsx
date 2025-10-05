@@ -46,45 +46,47 @@ function Playlist() {
 
   return (
     <div className="content">
-      <h2>Choose your Playlist</h2>
+      <div id="playlist">
+        <h2>Choose your Playlist</h2>
 
-      <div className="search-container">
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            className="search-bar"
-            placeholder="Search playlists..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </form>
-      </div>
+        <div className="search-container">
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              className="search-bar"
+              placeholder="Search playlists..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
+        </div>
 
-      <div className="playlist-content">
-        {loading && <p>Loading playlists...</p>}
-        {error && <p>Error: {error}</p>}
-        {!loading && !error && filteredPlaylists.length === 0 && (
-          <p>No playlists found.</p>
-        )}
+        <div className="playlist-content">
+          {loading && <p>Loading playlists...</p>}
+          {error && <p>Error: {error}</p>}
+          {!loading && !error && filteredPlaylists.length === 0 && (
+            <p>No playlists found.</p>
+          )}
 
-        <ul>
-          {filteredPlaylists.map((playlist) => (
-
-            <li
-              key={playlist.id}
-              onClick={() => handlePlaylistClick(playlist)}
-              className="playlist-item">
-              {playlist.name}
-
-              <strong className="playlist-title">{playlist.name}</strong>
-              <ul>
-                {playlist.songs.map((song, idx) => (
-                  <li key={idx} className="song-item">{song}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
+          <ul className="playlist-grid">
+            {filteredPlaylists.map((playlist) => (
+              <li
+                key={playlist.id}
+                onClick={() => handlePlaylistClick(playlist)}
+                className="playlist-item"
+              >
+                <strong className="playlist-title">{playlist.name}</strong>
+                <div className="song-dropdown">
+                  <ul>
+                    {playlist.songs.map((song, idx) => (
+                      <li key={idx} className="song-item">{song}</li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
