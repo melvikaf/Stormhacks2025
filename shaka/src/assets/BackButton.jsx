@@ -1,8 +1,8 @@
 import React from "react";
-import "./BackButton.css"; // optional, or put styles in main.css
+import "./BackButton.css"; 
 
 export default function BackButton() {
-  const handleBack = () => window.history.back(); // navigate to previous page
+  const handleBack = () => window.history.back();
 
   return (
     <div className="back-button-container">

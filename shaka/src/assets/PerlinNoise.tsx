@@ -128,7 +128,7 @@ export function PerlinNoiseBackground() {
             left: 0,
             width: "100vw",
             height: "100vh",
-            zIndex: -1, // behind everything
+            zIndex: -1, 
         }}
         aria-hidden="true"
     />

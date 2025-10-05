@@ -71,7 +71,6 @@ h3 {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  /* Full width of parent */
   box-sizing: border-box;
   position: fixed;
   top: 0;
@@ -126,7 +125,7 @@ h3 {
 
 .button-nav a:hover {
   font-family: 'babapro';
-  font-size: clamp(2rem, 7vw, 6rem); /* min 4rem, scales with 5% of viewport width, max 6rem */
+  font-size: clamp(2rem, 7vw, 6rem); 
   color: #21358e;
 }
 
@@ -319,8 +318,7 @@ h3 {
   border: 8px double #7f289c;
 }
 
-/* --- MOBILE & TABLET RESPONSIVENESS --- */
-
+/* --- RESPONSIVE STUFF --- */
 /* General adjustments */
 @media (max-width: 1024px) {
   .content {
@@ -330,7 +328,6 @@ h3 {
 
   h1 {
     font-size: 15rem;
-    /* smaller on tablet */
   }
 
   h2 {
@@ -399,7 +396,7 @@ h3 {
   .content {
     padding-left: 1rem;
     padding-right: 1rem;
-    box-sizing: border-box; /* important to include padding in width */
+    box-sizing: border-box; 
     width: 100%;
   }
 
@@ -414,11 +411,12 @@ h3 {
     width: 100%;
     margin: 0;
     padding: 0;
-    grid-template-columns: 1fr; /* single column */
+    grid-template-columns: 1fr; 
     gap: 1rem;
   }
+  
   .playlist-item {
-    width: 100%; /* fill grid column fully */
+    width: 100%; 
     padding: 1rem;
     box-sizing: border-box;
   }
