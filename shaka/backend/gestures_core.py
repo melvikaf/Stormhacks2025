@@ -1,8 +1,9 @@
-import cv2
-import time
-import numpy as np
+# backend/gestures_core.py
+# Tracks hands, shows gestures & volume visualization
+# Works with AirDJ runtime (via detect(frame)) or standalone visualization
+
+import cv2, time, numpy as np
 import mediapipe as mp
-import asyncio
 from collections import deque
 
 mp_hands = mp.solutions.hands
@@ -21,14 +22,18 @@ state = {
     "Right": {"volume": 50, "last_wave": {"text": "", "time": 0}},
 }
 
+
 # ---------- Helper Functions ----------
 def get_finger_states(pts, label):
     states = {"thumb": 0, "index": 0, "middle": 0, "ring": 0, "pinky": 0}
+
+    # Thumb horizontal movement
     if label == "Right":
         states["thumb"] = int(pts[4][0] > pts[3][0])
     else:
         states["thumb"] = int(pts[4][0] < pts[3][0])
 
+    # Vertical for others
     for name, tip, mid in zip(["index", "middle", "ring", "pinky"],
                               [8, 12, 16, 20], [6, 10, 14, 18]):
         states[name] = int(pts[tip][1] < pts[mid][1])
@@ -41,7 +46,7 @@ def classify_hand_state(label, pts):
     up_count = sum(fingers.values())
     gesture = "UNKNOWN"
 
-    # --- Base Gestures ---
+    # Basic shape gestures
     if up_count == 0:
         gesture = "FIST"
     elif up_count == 5:
@@ -55,21 +60,21 @@ def classify_hand_state(label, pts):
     else:
         gesture = f"{up_count}_FINGERS"
 
-    # --- Motion Detection ---
+    # Motion detection (wave + volume)
     hist = left_hist if label == "Left" else right_hist
     hist.append(wrist)
     if len(hist) == hist.maxlen:
         dx = hist[-1][0] - hist[0][0]
         dy = hist[-1][1] - hist[0][1]
 
-        # Horizontal movement (Wave)
+        # Horizontal wave
         if abs(dx) > 60 and abs(dx) > abs(dy):
             direction = "RIGHT" if dx > 0 else "LEFT"
             gesture += f"_WAVE_{direction}"
             state[label]["last_wave"]["text"] = f"{label} WAVED {direction.upper()}!"
             state[label]["last_wave"]["time"] = time.time()
 
-        # Vertical movement (Volume)
+        # Vertical move → volume
         elif abs(dy) > 60 and abs(dy) > abs(dx):
             vol = state[label]["volume"]
             vol += -dy * 0.4
@@ -79,6 +84,7 @@ def classify_hand_state(label, pts):
 
 
 def detect(frame):
+    """Process one frame and return detected hand gestures."""
     img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(img_rgb)
     if not result.multi_hand_landmarks:
@@ -101,12 +107,13 @@ def detect(frame):
     return outputs
 
 
-# ---------- Async webcam feed (for AirDJ + UI) ----------
-async def detect_async():
+# ---------- Standalone Visualization ----------
+if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-    print("🎥 Webcam started — full UI with volume bars and text")
+
+    print("🎥 Starting AirDJ Visualizer... Press 'X' or 'Esc' to exit.")
 
     while True:
         ok, frame = cap.read()
@@ -116,23 +123,23 @@ async def detect_async():
 
         results = detect(frame)
         h, w, _ = frame.shape
+
         left_x = 150
         right_x = w // 2 + 200
         y_base = 150
 
-        # --- Draw overlays ---
         for r in results:
             hand = r["hand"]
             x_pos = left_x if hand == "Left" else right_x
             y = y_base
 
-            # Translucent panel
+            # --- UI background ---
             overlay = frame.copy()
             cv2.rectangle(overlay, (x_pos - 20, y - 40),
                           (x_pos + 450, y + 130), (0, 0, 0), -1)
             frame = cv2.addWeighted(overlay, 0.4, frame, 0.6, 0)
 
-            # Hand info text
+            # --- Gesture Text ---
             text = f"{hand}: {r['gesture']}"
             cv2.putText(frame, text, (x_pos, y),
                         cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 0, 255), 2)
@@ -140,7 +147,7 @@ async def detect_async():
                         (x_pos, y + 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
 
-            # Volume bar
+            # --- Volume Bar ---
             bar_x = x_pos
             bar_y = h - 150
             vol_height = int((r['volume'] / 100) * 300)
@@ -149,27 +156,17 @@ async def detect_async():
             cv2.rectangle(frame, (bar_x, bar_y - 300),
                           (bar_x + 60, bar_y), (255, 255, 255), 3)
 
-            # Wave notification
+            # --- Wave text ---
             wave_info = state[hand]["last_wave"]
             if time.time() - wave_info["time"] < 1.5:
                 cv2.putText(frame, wave_info["text"],
                             (x_pos, bar_y - 350),
                             cv2.FONT_HERSHEY_DUPLEX, 1.1, (0, 255, 255), 3)
 
-        cv2.imshow("🎧 AirDJ — Dual-Hand Tracker with Volume & Gestures", frame)
+        cv2.imshow("🎧 AirDJ — Full HD Dual-Hand Tracker", frame)
         key = cv2.waitKey(1) & 0xFF
-        if key == 27 or key == ord('x') or key == ord('X'):
+        if key in [27, ord('x'), ord('X')]:
             break
-
-        # Send gesture data to AirDJ runtime
-        if results:
-            yield results[0]
-        await asyncio.sleep(0.05)
 
     cap.release()
     cv2.destroyAllWindows()
-
-
-# ---------- Manual Test ----------
-if __name__ == "__main__":
-    asyncio.run(detect_async())
