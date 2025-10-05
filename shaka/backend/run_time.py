@@ -10,6 +10,11 @@ import json
 import random
 import time
 
+# importing from gestures.py
+import cv2
+from gestures import detect
+
+
 # ------------------------------
 # Global state
 # ------------------------------
@@ -155,10 +160,31 @@ async def _release_lowpass():
     await broadcast({"type":"action","name":"lowpass_release"})
     await broadcast({"type":"state", **STATE})
 
+#camera source to connect to gestures.py
+async def camera_source():
+    cap = cv2.VideoCapture(0)
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+
+        results = detect(frame)   
+        for r in results:
+            # Print detected gestures to console
+            print(f"Detected: {r['gesture']} (confidence: {r['conf']:.2f})")
+            # normalize output so it matches your expected format
+            yield {
+                "name": r["gesture"],
+                "conf": r["conf"],
+                "ts": r["ts"]
+            }
+
+        # allow event loop to handle other tasks
+        await asyncio.sleep(0)
 
 # ------------------------------
 # Entrypoint for testing
 # ------------------------------
 if __name__ == "__main__":
-    asyncio.run(run_loop(fake_source()))
+    asyncio.run(run_loop(camera_source()))
 
