@@ -56,9 +56,9 @@ export function PerlinNoiseBackground() {
         }
 
         let time = 0
-        const scale = 0.002
-        const timeScale = 0.006
-        const gridSize = 10
+        const scale = 0.001
+        const timeScale = 0.004
+        const gridSize = 15
         const maxRadius = 5
 
         const animate = () => {
@@ -72,14 +72,14 @@ export function PerlinNoiseBackground() {
                     const combinedNoise = (noise1 + noise2 * 0.5) / 1.1
                     const normalizedNoise = (combinedNoise + 1) / 2
 
-                    const offsetX = Math.sin(time * 2 + x * 0.01) * 5
-                    const offsetY = Math.cos(time * 2 + y * 0.01) * 5
+                    const offsetX = Math.sin(time * 2 + x * 0.01) * 30
+                    const offsetY = Math.cos(time * 2 + y * 0.01) * -20
 
                     const pulse = Math.sin(time * 3 + x * 0.02 + y * 0.02) * 0.3 + 0.7
                     const dx = x - mouseX
                     const dy = y - mouseY
                     const distance = Math.sqrt(dx * dx + dy * dy)
-                    const maxDistance = 150
+                    const maxDistance = 300
 
                     let proximityBoost = 1
                     if (distance < maxDistance) {

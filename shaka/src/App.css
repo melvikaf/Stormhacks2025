@@ -21,6 +21,8 @@ body {
 
 .content {
   padding-top: 6rem;
+  padding-left: 4rem;
+  padding-right: 4rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,4 +253,99 @@ h3 {
 
 .play-btn:hover {
   background-color: #7f289c;
+}
+
+/* DJ part */
+.curr-next-songs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.curr-next-songs .current-song,
+.curr-next-songs .next-song {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.curr-next-songs .next-song {
+  text-align: right;
+}
+
+.curr-next-songs span {
+  display: block;
+}
+
+.curr-next-songs .current-song span:first-child,
+.curr-next-songs .next-song span:first-child {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.curr-next-songs .current-song span:last-child,
+.curr-next-songs .next-song span:last-child {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  height: 0.5rem;
+  /* h-2 */
+  background-color: #e5e7eb;
+  /* bg-accent */
+  border-radius: 9999px;
+  /* rounded-full */
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #3b82f6;
+  /* bg-primary */
+  width: 0%;
+  /* dynamic width */
+  transition: width 0.1s linear;
+}
+
+/* Play/Pause Button */
+.play-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.play-btn button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.play-btn button:hover {
+  background-color: #2563eb;
+}
+
+/* About */
+.about {
+  font-size: 1.5rem;
+  width: 70vw;
+}
+
+.about-box {
+  background-color: #0e0d0e;
+  padding: 5rem;
+  border-radius: 1rem;
+  border: 2px solid #7f289c;
 }

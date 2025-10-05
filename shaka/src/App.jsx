@@ -4,8 +4,8 @@ import { PerlinNoiseBackground } from './assets/PerlinNoise';
 
 import BackButton from './assets/BackButton';
 import Home from './pages/Home';
+import About from './pages/About';
 import Playlist from './pages/Playlist';
-import IndivSong from './pages/IndivSong';
 import DJ from "./pages/DJ";
 
 function App() {
@@ -19,17 +19,16 @@ function App() {
             <ul className="nav-links">
               <li><a href="/">Home</a></li>
               <li><a href="/about">About</a></li>
-              <li><a href="/projects">Projects</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li><a href="/playlist">Playlist</a></li>
             </ul>
           </div>
         </nav>
 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path='/about' element={<About />} />
           <Route path="/playlist" element={<Playlist />} />
-          <Route path="/playlist/:id" element={<IndivSong />} />
-          <Route path="/dj" element={<DJ />} />
+          <Route path="/playlist/:id" element={<DJ />} />
         </Routes>
       </div>
     </Router>
