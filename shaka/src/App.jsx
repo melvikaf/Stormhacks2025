@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
 import './App.css';
+
 import BackButton from './assets/BackButton';
 import Home from './pages/Home';
 import Playlist from './pages/Playlist';
+import IndivSong from './pages/IndivSong';
+import DJ from "./pages/DJ";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/playlist" element={<Playlist />} />
+          <Route path="/playlist/:id" element={<IndivSong />} />
+          <Route path="/dj" element={<DJ />} />
         </Routes>
       </div>
     </Router>

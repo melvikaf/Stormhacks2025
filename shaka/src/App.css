@@ -113,6 +113,7 @@ h2 {
   display: flex;
   justify-content: center;
   width: 100vw;
+  margin-bottom: 5rem;
 }
 
 .search-bar {
@@ -134,7 +135,71 @@ h2 {
   opacity: 0.7;
 }
 
+.search-bar:hover {
+  border-color: #21358e;
+}
+
 .search-bar:focus {
   border-color: #C44DEB;
   box-shadow: 0 0 20px rgba(31, 65, 218, 0.5);
+}
+
+/* Playlist.css */
+.playlist-content ul {
+  list-style: none;
+  padding: 0;
+  width: 60vw;
+}
+
+.playlist-item {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 2px solid #1F41DA;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background-color: #2D2A32;
+}
+
+.playlist-item:hover {
+  background-color: #323038;
+}
+
+.playlist-title {
+  font-size: 2rem;
+  color: #C44DEB;
+  font-family: 'babapro';
+}
+
+.song-item {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Play Button */
+.play-btn {
+  background-color: #C44DEB;
+  font-family: 'babapro';
+  font-size: 2rem;
+  padding: 0.5rem 2rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  position: fixed;
+  bottom: 5rem;
+  right: 5rem;
+  z-index: 1000;
+}
+
+.play-btn a {
+  color: white;
+}
+
+.play-btn a:hover {
+  color: white;
+}
+
+.play-btn:hover {
+  background-color: #7f289c;
 }
